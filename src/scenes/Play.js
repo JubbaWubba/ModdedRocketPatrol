@@ -6,12 +6,16 @@ class Play extends Phaser.Scene {
     preload() {
         // load images/tile sprites
         this.load.image('rocket', './assets/rocket.png');
+        this.load.audio('background', './assets/background.wav');
         this.load.image('spaceship', './assets/spaceship.png');
         this.load.image('starfield', './assets/starfield.png');
         this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9})
       }
 
     create() {
+        // background audio, credited to Benjamin Tissot (also known as Bensound) from bensounds.com
+        this.backgroundaudio = this.sound.add("background", { loop: true });
+        this.backgroundaudio.play();
         // place tile sprite
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
         // green UI background
