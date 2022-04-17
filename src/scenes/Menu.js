@@ -28,11 +28,13 @@ class Menu extends Phaser.Scene {
     this.add.text(game.config.width/2, game.config.height/2, 'WASD or Arrow keys to fire and move', menuConfig).setOrigin(0.5);
     menuConfig.backgroundColor = '#00FF00';
     menuConfig.color = '#000';
-    this.add.text(game.config.width/2, game.config.height/2 + borderUISize + borderPadding, 'Press ← for Novice or → for Expert', menuConfig).setOrigin(0.5);
+    this.add.text(game.config.width/2, game.config.height/2 + borderUISize + borderPadding, '←Novice, →Expert, or ↓multiplayer', menuConfig).setOrigin(0.5);
     // Keybinds 
     // define keys
     keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+    keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+
     }
 
     update() {
@@ -41,18 +43,33 @@ class Menu extends Phaser.Scene {
         game.settings = {
           spaceshipSpeed: 3,
           spaceship2Speed: 6,
-          gameTimer: 60000    
+          gameTimer: 60000,
+          multiplayer: 0,    
         }
+        console.log(game.settings.multiplayer)
         this.sound.play('sfx_select');
         this.scene.start('playScene');    
       }
       if (Phaser.Input.Keyboard.JustDown(keyRIGHT)) {
         // hard mode
         game.settings = {
-          spaceshipSpeed: 4,
+          spaceshipSpeed: 2,
           spaceship2Speed: 8,
-          gameTimer: 45000    
+          gameTimer: 45000,
+          multiplayer: 0,    
         }
+        this.sound.play('sfx_select');
+        this.scene.start('playScene');    
+      }
+      if (Phaser.Input.Keyboard.JustDown(keyDown)) {
+        // Multiplayer
+        game.settings = {
+          spaceshipSpeed: 3,
+          spaceship2Speed: 7,
+          gameTimer: 60000,
+          multiplayer: 1,    
+        }
+        console.log(game.settings.multiplayer)
         this.sound.play('sfx_select');
         this.scene.start('playScene');    
       }

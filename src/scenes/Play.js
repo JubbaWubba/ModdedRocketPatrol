@@ -31,6 +31,10 @@ class Play extends Phaser.Scene {
         // define keys
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
         KeyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
@@ -38,8 +42,16 @@ class Play extends Phaser.Scene {
 
         // add rocket (p1)
         this.p1Rocket = new Rocket(this, game.config.width/2, game.config.height - borderUISize - borderPadding, 'rocket',0,keyLEFT, keyRIGHT, KeyUp).setOrigin(0.5, 0);
+        //add 2nd player rocket
+        if(game.settings.multiplayer == 1) {
+            this.p2Rocket = new Rocket(this, game.config.width/2+200, game.config.height - borderUISize - borderPadding, 'rocket',0,keyA, keyD, keyW).setOrigin(0.5, 0);
+        }
          // add Missle (p1)
          this.p1missle = new Missle(this, game.config.width/2, game.config.height+10 - borderUISize - borderPadding, 'missle',0,keyDown).setOrigin(0.5, 0);
+         if(game.settings.multiplayer == 1) {
+         // add Missle (p2)
+        this.p2missle = new Missle(this, game.config.width/2+200, game.config.height+10 - borderUISize - borderPadding, 'missle',0,keyS).setOrigin(0.5, 0);
+         }
         // add spaceships (x3)
         this.ship01 = new Spaceship(this, game.config.width + borderUISize*6, borderUISize*4, 'spaceship', 0, 30).setOrigin(0, 0);
         this.ship02 = new Spaceship(this, game.config.width + borderUISize*3, borderUISize*5 + borderPadding*2, 'spaceship', 0, 20).setOrigin(0,0);
@@ -56,6 +68,7 @@ class Play extends Phaser.Scene {
         });
         // initialize score
         this.p1Score = 0;
+        this.p2Score =0;
  
         // display score
         let scoreConfig = {
@@ -71,6 +84,10 @@ class Play extends Phaser.Scene {
             fixedWidth: 100
   }
         this.scoreLeft = this.add.text(borderUISize + borderPadding, borderUISize + borderPadding*2, this.p1Score, scoreConfig);
+        if(game.settings.multiplayer == 1) {
+            this.scoreRight = this.add.text(borderUISize + borderPadding+460, borderUISize + borderPadding*2, this.p2Score, scoreConfig);
+
+        }
         //Game Over 
         this.GameOver = false;
         // 60-second play clock
@@ -105,6 +122,12 @@ class Play extends Phaser.Scene {
             this.ship03.update();
             this.ship04.update();
             this.p1missle.update();
+            if(game.settings.multiplayer == 1) {
+            this.p2missle.update();
+            this.p2Rocket.update();             // update p2
+            }
+
+
         }
         // check collisions
         if(this.checkCollision(this.p1Rocket, this.ship03)) {
@@ -141,6 +164,42 @@ class Play extends Phaser.Scene {
             this.p1missle.reset()
             this.shipExplode(this.ship04);   
         }
+        if(game.settings.multiplayer ==1){
+            if(this.checkCollision(this.p2Rocket, this.ship03)) {
+                this.p2Rocket.reset();
+                this.shipExplode2(this.ship03);   
+            }
+            if (this.checkCollision(this.p2Rocket, this.ship02)) {
+                this.p2Rocket.reset();
+                this.shipExplode2(this.ship02);   
+            }
+            if (this.checkCollision(this.p2Rocket, this.ship01)) {
+                this.p2Rocket.reset();
+                this.shipExplode2(this.ship01);   
+            }
+            if (this.checkCollision(this.p2Rocket, this.ship04)) {
+                this.p2Rocket.reset();
+                this.shipExplode2(this.ship04);   
+            }
+            
+    
+            if(this.checkCollision(this.p2missle, this.ship03)) {
+                this.p2missle.reset()
+                this.shipExplode2(this.ship03);   
+            }
+            if (this.checkCollision(this.p2missle, this.ship02)) {
+                this.p2missle.reset()
+                this.shipExplode2(this.ship02);   
+            }
+            if (this.checkCollision(this.p2missle, this.ship01)) {
+                this.p2missle.reset()
+                this.shipExplode2(this.ship01);   
+            }
+            if (this.checkCollision(this.p2missle, this.ship04)) {
+                this.p2missle.reset()
+                this.shipExplode2(this.ship04);   
+            } 
+        }
         this.timeupdate()
       }
     
@@ -170,9 +229,32 @@ class Play extends Phaser.Scene {
         // score add and repaint
         this.p1Score += ship.points;
         this.scoreLeft.text = this.p1Score;
-        this.clock.delay += 1000
+        if(game.settings.multiplayer == 0){
+
+         this.clock.delay += 1000}
         this.sound.play('sfx_explosion');
       }
+
+      shipExplode2(ship) {
+        // temporarily hide ship
+        ship.alpha = 0;
+        // create explosion sprite at ship's position
+        let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0);
+        boom.anims.play('explode');             // play explode animation
+        boom.on('animationcomplete', () => {    // callback after anim completes
+          ship.reset();                         // reset ship position
+          ship.alpha = 1;                       // make ship visible again
+          boom.destroy();                       // remove explosion sprite
+        }); 
+        // score add and repaint
+        this.p2Score += ship.points;
+        this.scoreRight.text = this.p2Score;
+        if(game.settings.multiplayer == 0){
+
+         this.clock.delay += 1000}
+        this.sound.play('sfx_explosion');
+      }
+
     timeupdate() {
         this.remaining = this.clock.getOverallRemainingSeconds(); 
         this.timeleft.text =Math.floor(this.remaining * 1);
